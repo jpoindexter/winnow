@@ -12,3 +12,9 @@ for (const c of toon.cases) {
   console.log(`  ${c.id.padEnd(12)} save ${pct(c.ratio).padStart(4)}  inline ${c.inlineSurvived ? "✓" : "·"}`);
 }
 console.log(`  every row kept; deep-middle needle now survives inline: ${toon.cases.find((c) => c.id === "json-middle")?.inlineSurvived}`);
+
+const dict = runFidelity(CORPUS.filter((c) => c.kind === "json"), { tabular: true, dictionary: true });
+console.log("\n— TOON + dictionary (columnar, lossless) on object-array cases —");
+for (const c of dict.cases) {
+  console.log(`  ${c.id.padEnd(12)} save ${pct(c.ratio).padStart(4)}  inline ${c.inlineSurvived ? "✓" : "·"}`);
+}

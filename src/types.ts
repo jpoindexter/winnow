@@ -36,6 +36,9 @@ export interface CompressOptions {
   /** Object-arrays: transcode to a lossless TOON table (keep every row) instead of
    * eliding the middle. Default false (the crusher's elision stays the default). */
   tabular?: boolean;
+  /** With tabular: also try columnar (TOONC) encoding and keep whichever is smaller —
+   * bigger win on low-cardinality data, at some readability cost. Default false. */
+  dictionary?: boolean;
 }
 
 export const DEFAULTS: Required<CompressOptions> = {
@@ -44,4 +47,5 @@ export const DEFAULTS: Required<CompressOptions> = {
   tailItems: 1,
   maxStringLength: 200,
   tabular: false,
+  dictionary: false,
 };

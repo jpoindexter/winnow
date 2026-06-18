@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { encodeTable, decodeTable, toonCompress, isObjectArray } from "./toon.js";
+import { encodeTable, decodeTable, toonCompress, isObjectArray, encodeColumnar, decodeColumnar } from "./toon.js";
 import { estTokens } from "./types.js";
 
 describe("encodeTable / decodeTable round-trip (lossless)", () => {
@@ -40,6 +40,44 @@ describe("encodeTable compactness + tricky round-trips", () => {
     const back = decodeTable(encodeTable(rows)!);
     expect(back).toEqual(rows); // "" preserved, missing c stays absent, types intact
     expect(back![1]).not.toHaveProperty("c"); // missing ≠ empty string
+  });
+});
+
+describe("columnar TOON (TOONC) — constant + dictionary columns", () => {
+  // low-cardinality wide rows: plan/region constant, status/role/tier few values
+  const rows = Array.from({ length: 100 }, (_, i) => ({
+    id: i, email: `u${i}@x.com`, status: i % 2 ? "active" : "idle",
+    role: i % 3 ? "member" : "admin", plan: "pro", region: "us-east-1",
+  }));
+
+  it("round-trips losslessly (const + dict + plain + missing + types)", () => {
+    const mixed = [
+      { id: 1, status: "active", role: "admin", plan: "pro", n: 5, ok: true },
+      { id: 2, status: "idle", role: "member", plan: "pro" }, // n/ok missing
+      { id: 3, status: "active", role: "admin", plan: "pro", n: null, ok: false },
+    ];
+    expect(decodeColumnar(encodeColumnar(mixed)!)).toEqual(mixed);
+  });
+
+  it("beats plain TOON on low-cardinality data, still lossless", () => {
+    const plain = encodeTable(rows)!;
+    const col = encodeColumnar(rows)!;
+    expect(col.startsWith("TOONC ")).toBe(true);
+    expect(estTokens(col)).toBeLessThan(estTokens(plain)); // dictionary/const win
+    expect(decodeColumnar(col)).toEqual(rows); // lossless
+  });
+
+  it("decodeTable routes TOONC and TOON to the right decoder", () => {
+    expect(decodeTable(encodeColumnar(rows)!)).toEqual(rows);
+    expect(decodeTable(encodeTable(rows)!)).toEqual(rows);
+  });
+
+  it("toonCompress({dictionary}) returns the smaller encoding", () => {
+    const out = toonCompress(JSON.stringify(rows), { dictionary: true })!;
+    expect(out.startsWith("TOONC ")).toBe(true); // columnar wins here
+    expect(decodeTable(out)).toEqual(rows);
+    // default (no opts) stays plain TOON
+    expect(toonCompress(JSON.stringify(rows))!.startsWith("TOON ")).toBe(true);
   });
 });
 

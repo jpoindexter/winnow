@@ -50,7 +50,7 @@ function applyCompressor(text: string, type: ContentType, opts: Required<Compres
   if (type === "json") {
     // Opt-in: lossless TOON table (keeps every row) before falling back to elision.
     if (opts.tabular) {
-      const table = toonCompress(text);
+      const table = toonCompress(text, { dictionary: opts.dictionary });
       if (table) return table;
     }
     return crushJson(text, opts);

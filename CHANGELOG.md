@@ -2,6 +2,15 @@
 
 All notable changes to winnow are documented here. Versions follow [semver](https://semver.org).
 
+## 0.5.0 — columnar TOON (dictionary / constant-column)
+
+- **TOON columnar mode (TOONC)** — `encodeColumnar`/`decodeColumnar`, opt-in via
+  `compress(text,{tabular:true,dictionary:true})` / `toonCompress(json,{dictionary:true})`.
+  Constant columns are stated once; low-cardinality columns become a dictionary + per-row
+  index; the rest stay plain. Lossless round-trip; `decodeTable` auto-routes TOON vs TOONC.
+  Bench: object-array cases **59–60% → 73–74%** savings, still lossless. Plain TOON stays
+  the default (dictionary trades some readability for ratio).
+
 ## 0.4.0 — TOON encoder compaction
 
 - **TOON now emits plain strings raw** instead of JSON-encoding every cell (which
