@@ -25,6 +25,18 @@ export type { DedupResult } from "./dedup.js";
 export { compactHistory } from "./history.js";
 export type { Msg, CompactOptions } from "./history.js";
 
+// Token pruning (LLMLingua-style; scorer injected)
+export { pruneText } from "./prune.js";
+export type { TokenScorer, PruneOptions, PruneResult } from "./prune.js";
+
+// Token counting (heuristic default; inject a real encoder for exact counts)
+export { makeCounter, heuristicCount, countTokens } from "./tokens.js";
+export type { Encoder } from "./tokens.js";
+
+// Adaptive, bench-driven option tuning
+export { tuneOptions, DEFAULT_GRID } from "./adapt.js";
+export type { TuneResult } from "./adapt.js";
+
 // Reversible store
 export { retrieve, stashOriginal, contentId, resolveStoreDir } from "./store.js";
 

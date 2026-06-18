@@ -2,9 +2,9 @@
 
 All notable changes to winnow are documented here. Versions follow [semver](https://semver.org).
 
-## Unreleased
+## 0.3.0 — compression-technique expansion
 
-### Tier 1 — deterministic, lossless/reversible expansions
+### Tier 1 — deterministic, lossless/reversible
 - **TOON tabular transcoding** (`encodeTable`/`decodeTable`/`toonCompress`) — re-encode an
   object-array as a delimited table: keys once + one line per row. Keeps EVERY row and is
   fully lossless (types/nesting/null-vs-missing survive). Opt-in via `compress(text,{tabular:true})`.
@@ -14,6 +14,18 @@ All notable changes to winnow are documented here. Versions follow [semver](http
 - **History compaction** (`compactHistory`) — anchored iterative summarization for a chat
   array: keep recent turns verbatim, fold older into one summary; injected summarizer with a
   model-free extractive fallback.
+
+### Tier 2 — pluggable, model-optional
+- **Token pruning** (`pruneText`) — the LLMLingua-style score-and-drop mechanism with an
+  INJECTED scorer (bring your small-LM perplexity for LLMLingua-grade) and a model-free
+  self-information proxy fallback. Opt-in; protects numbers/code.
+- **Accurate token counting** (`makeCounter`/`countTokens`) — heuristic by default, exact
+  when you inject a real encoder (e.g. a pure-JS tokenizer).
+
+### Tier 3 — adaptive, measured
+- **Bench-driven tuning** (`tuneOptions`) — run candidate option sets through the fidelity
+  bench and pick the one maximizing a weighted blend of needle-survival and savings; feed it
+  your own traces to tune to your workload.
 
 ## 0.2.0
 

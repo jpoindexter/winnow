@@ -80,8 +80,14 @@ The honest tradeoff is visible: a needle buried deep in the middle of a 200-row 
 | `compressMessages(messages, opts?)` | Compress each `{ content }` in a chat array. |
 | `retrieve(id, dir?)` | Read a stored original back by id. |
 | `stats(before, after)` | Token savings + ratio. |
-| `compressText(text, opts?)` | Pure router (no I/O, no stashing). |
+| `compressText(text, opts?)` | Pure router (no I/O, no stashing). `opts.tabular` → lossless TOON. |
 | `crushJson` / `squashLogs` / `compressCode` | Individual compressors. |
+| `encodeTable` / `decodeTable` / `toonCompress` | **TOON** — lossless object-array ↔ table (keeps every row). |
+| `dedupeBlocks` / `rehydrateBlocks` / `dedupeMessages` | Collapse repeated blocks/messages anywhere; reversible. |
+| `compactHistory(messages, opts?)` | Anchored history compaction (injected summarizer, extractive fallback). |
+| `pruneText(text, opts?)` | LLMLingua-style score-and-drop; **inject your own scorer**, heuristic fallback. |
+| `makeCounter(encode?)` / `countTokens` | Token counting — exact with an injected encoder. |
+| `tuneOptions(cases?, grid?, weight?)` | Pick compression options that maximize measured survival × savings. |
 | `offload(text, opts?)` | Size-based offload with the backbone-gated delivery policy. |
 | `resolveDelivery` / `classifyBackbone` | The delivery policy primitives. |
 | `alignSegments(segments)` | Cache-align a tiered prompt; returns the prompt, stable-prefix `cacheKey`, and breakpoint. |
