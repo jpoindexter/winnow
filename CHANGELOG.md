@@ -2,6 +2,13 @@
 
 All notable changes to winnow are documented here. Versions follow [semver](https://semver.org).
 
+## 0.7.0 — gzipped CCR stash
+
+- **The reversible store is now gzipped on disk** (node:zlib, zero new dep). The model
+  never reads the stash directly — it reads the inline view and expands via retrieve — so
+  byte compression is free here. retrieve decompresses transparently and still reads any
+  legacy plaintext stash. offload footer path updated to .txt.gz.
+
 ## 0.6.0 — Cost-Normalized Gain (CNG)
 
 - **CNG metric** (costNormalizedGain / compressionCng) from S2L (arXiv:2606.16769): quality

@@ -40,7 +40,7 @@ export async function offload(text: string, opts: OffloadOptions = {}): Promise<
     const id = await stashOriginal(text, opts.dir);
     const { mode, inlineChars } = resolveDelivery(opts);
     const preview = text.slice(0, Math.max(inlineChars, FILE_PREVIEW));
-    const path = `.winnow/ccr/${id}.txt`;
+    const path = `.winnow/ccr/${id}.txt.gz`; // gzipped on disk — read it back via winnow_retrieve
     const footer = mode === "file"
       ? `\n\n[output truncated: ${text.length} chars. summary: ${summarize(text)}\n` +
         `full result stored at ${path} — id="${id}", call winnow_retrieve to read it all]`

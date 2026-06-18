@@ -1,12 +1,15 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { gzipSync, gunzipSync } from "node:zlib";
 import { join } from "node:path";
 
 // Reversible store — compression is lossy by design; this makes it lossless on demand.
 // The original text is stashed under a short content hash; the caller hands the model a
-// retrieval id and can read the full text back later. No database — flat files. All
-// local. Best-effort writes: a stash failure never costs the caller the compressed text.
+// retrieval id and can read the full text back later. No database — flat files. The stash
+// is gzipped on disk (node:zlib, zero new dep) — the model never reads it directly, so
+// byte compression is free here; retrieve decompresses transparently and still reads any
+// legacy plaintext stash. Best-effort: a stash failure never costs the compressed text.
 
 const STORE_SUBDIR = "ccr";
 const ID_LEN = 10;
@@ -33,15 +36,22 @@ export async function stashOriginal(text: string, dir?: string): Promise<string>
   const id = contentId(text);
   const root = ccrDir(resolveStoreDir(dir));
   await mkdir(root, { recursive: true });
-  const path = join(root, `${id}.txt`);
-  if (!existsSync(path)) await writeFile(path, text, "utf-8");
+  const path = join(root, `${id}.txt.gz`);
+  // Idempotent: same content → same id → same file. Skip if either form already exists.
+  if (!existsSync(path) && !existsSync(join(root, `${id}.txt`))) {
+    await writeFile(path, gzipSync(Buffer.from(text, "utf-8")));
+  }
   return id;
 }
 
-/** Retrieve a stashed original by id, or null if unknown. */
+/** Retrieve a stashed original by id, or null if unknown. Reads the gzipped stash, then
+ * falls back to a legacy plaintext stash. */
 export async function retrieve(id: string, dir?: string): Promise<string | null> {
   if (!/^[a-f0-9]{1,64}$/.test(id)) return null; // ids are hex only
-  const path = join(ccrDir(resolveStoreDir(dir)), `${id}.txt`);
-  if (!existsSync(path)) return null;
-  return readFile(path, "utf-8");
+  const root = ccrDir(resolveStoreDir(dir));
+  const gz = join(root, `${id}.txt.gz`);
+  if (existsSync(gz)) return gunzipSync(await readFile(gz)).toString("utf-8");
+  const legacy = join(root, `${id}.txt`);
+  if (existsSync(legacy)) return readFile(legacy, "utf-8");
+  return null;
 }
