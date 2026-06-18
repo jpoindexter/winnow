@@ -2,6 +2,13 @@
 
 All notable changes to winnow are documented here. Versions follow [semver](https://semver.org).
 
+## 0.8.0 — LM pruning backend
+
+- **pruneTextAsync + makeLmScorer** — wire a real LM into the LLMLingua-style pruner:
+  makeLmScorer(logprobFn) maps per-token logprobs to surprisal (= -logprob; surprising
+  tokens kept, predictable filler dropped). pruneText (sync heuristic proxy) stays the
+  zero-dep default. ML-vs-heuristic *quality* measurement needs a live model (follow-up).
+
 ## 0.7.0 — gzipped CCR stash
 
 - **The reversible store is now gzipped on disk** (node:zlib, zero new dep). The model

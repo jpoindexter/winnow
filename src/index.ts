@@ -25,9 +25,9 @@ export type { DedupResult } from "./dedup.js";
 export { compactHistory } from "./history.js";
 export type { Msg, CompactOptions } from "./history.js";
 
-// Token pruning (LLMLingua-style; scorer injected)
-export { pruneText } from "./prune.js";
-export type { TokenScorer, PruneOptions, PruneResult } from "./prune.js";
+// Token pruning (LLMLingua-style; sync heuristic default, async LM backend)
+export { pruneText, pruneTextAsync, makeLmScorer } from "./prune.js";
+export type { TokenScorer, PruneOptions, PruneResult, AsyncTokenScorer, AsyncPruneOptions, LogprobFn } from "./prune.js";
 
 // Token counting (heuristic default; inject a real encoder for exact counts)
 export { makeCounter, heuristicCount, countTokens } from "./tokens.js";
