@@ -24,6 +24,25 @@ describe("encodeTable / decodeTable round-trip (lossless)", () => {
   });
 });
 
+describe("encodeTable compactness + tricky round-trips", () => {
+  it("emits plain strings RAW (no per-cell quoting) — the savings win", () => {
+    const table = encodeTable([{ id: "ALPHA", name: "plain text value" }])!;
+    expect(table).toContain("ALPHA");
+    expect(table).not.toContain('"""'); // no triple-quoting of plain strings/keys
+  });
+
+  it("round-trips literal-looking strings, empty string vs missing, and newlines", () => {
+    const rows = [
+      { a: "true", b: "42", c: "" }, // strings that look like literals / empty
+      { a: true, b: 42 }, // real boolean/number + c MISSING
+      { a: "line1\nline2", b: "has, comma" }, // newline + comma
+    ];
+    const back = decodeTable(encodeTable(rows)!);
+    expect(back).toEqual(rows); // "" preserved, missing c stays absent, types intact
+    expect(back![1]).not.toHaveProperty("c"); // missing ≠ empty string
+  });
+});
+
 describe("isObjectArray", () => {
   it("accepts arrays of plain objects, rejects others", () => {
     expect(isObjectArray([{ a: 1 }])).toBe(true);

@@ -2,6 +2,14 @@
 
 All notable changes to winnow are documented here. Versions follow [semver](https://semver.org).
 
+## 0.4.0 — TOON encoder compaction
+
+- **TOON now emits plain strings raw** instead of JSON-encoding every cell (which
+  double-quoted them via CSV). Only values that would be misread are escaped
+  (non-strings, empty string, newline- or literal-looking strings). Same lossless
+  round-trip; roughly doubles the savings on real string-heavy data (bench json cases
+  32% → 59%). TOON views are ephemeral (regenerated per read), so no migration concern.
+
 ## 0.3.0 — compression-technique expansion
 
 ### Tier 1 — deterministic, lossless/reversible

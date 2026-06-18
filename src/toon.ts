@@ -36,6 +36,25 @@ function parseCsv(line: string): string[] {
   return out;
 }
 
+// Encode one cell, minimizing overhead while staying lossless. Plain text strings are
+// emitted RAW (the common case — no quotes); only values that would be MISREAD on decode
+// are JSON-encoded: non-strings (number/bool/null/object/array), the empty string (else it
+// collides with a missing key), strings containing a newline (would break the row), and
+// strings that look like a JSON literal (e.g. "true", "42" — else decode reparses them).
+function encodeCell(v: unknown): string {
+  if (typeof v === "string") {
+    if (v === "" || /[\n\r]/.test(v)) return JSON.stringify(v);
+    try { JSON.parse(v); return JSON.stringify(v); } catch { return v; }
+  }
+  return JSON.stringify(v);
+}
+
+/** Decode one cell: JSON when it parses (number/bool/null/object/array/quoted-string),
+ * otherwise the raw string. Inverse of encodeCell. */
+function decodeCell(field: string): unknown {
+  try { return JSON.parse(field); } catch { return field; }
+}
+
 /** True for a non-empty array of plain (non-array) objects — the transcodable shape. */
 export function isObjectArray(v: unknown): v is Row[] {
   return Array.isArray(v) && v.length > 0 &&
@@ -53,8 +72,8 @@ export function encodeTable(rows: Row[]): string | null {
   const seen = new Set<string>();
   for (const r of rows) for (const k of Object.keys(r)) if (!seen.has(k)) { seen.add(k); keys.push(k); }
   const head = `${HEADER} ${rows.length}`;
-  const keyRow = csvRow(keys.map((k) => JSON.stringify(k)));
-  const dataRows = rows.map((r) => csvRow(keys.map((k) => (k in r ? JSON.stringify(r[k]) : ""))));
+  const keyRow = csvRow(keys.map((k) => encodeCell(k)));
+  const dataRows = rows.map((r) => csvRow(keys.map((k) => (k in r ? encodeCell(r[k]) : ""))));
   return [head, keyRow, ...dataRows].join("\n");
 }
 
@@ -64,14 +83,14 @@ export function decodeTable(text: string): Row[] | null {
   if (!lines[0]?.startsWith(`${HEADER} `)) return null;
   const n = parseInt(lines[0].slice(HEADER.length + 1), 10);
   if (!Number.isFinite(n) || lines.length < 2) return null;
-  const keys = parseCsv(lines[1]!).map((c) => JSON.parse(c) as string);
+  const keys = parseCsv(lines[1]!).map((c) => decodeCell(c) as string);
   const rows: Row[] = [];
   for (let i = 0; i < n; i++) {
     const line = lines[2 + i];
     if (line === undefined) break;
     const fields = parseCsv(line);
     const obj: Row = {};
-    keys.forEach((k, j) => { if (fields[j] !== undefined && fields[j] !== "") obj[k] = JSON.parse(fields[j]!); });
+    keys.forEach((k, j) => { if (fields[j] !== undefined && fields[j] !== "") obj[k] = decodeCell(fields[j]!); });
     rows.push(obj);
   }
   return rows;
