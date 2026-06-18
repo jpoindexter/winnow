@@ -1,5 +1,6 @@
 import { runFidelity } from "./bench/fidelity.js";
 import { CORPUS, type BenchCase } from "./bench/corpus.js";
+import { compressionCng } from "./cng.js";
 import type { CompressOptions } from "./types.js";
 
 // Adaptive compression (ACON-style). Compression has a knob — aggressive elision saves
@@ -10,11 +11,15 @@ import type { CompressOptions } from "./types.js";
 
 export interface TuneResult {
   options: CompressOptions;
-  /** Weighted objective, 0..1. */
+  /** The ranking objective's value for the winner. */
   score: number;
   survival: number;
   ratio: number;
+  /** Cost-Normalized Gain vs uncompressed (quality kept per token saved). */
+  cng: number;
 }
+
+export type RankBy = "weighted" | "cng";
 
 /** Default candidate grid: lossless TOON vs elision at a few head/tail budgets. */
 export const DEFAULT_GRID: CompressOptions[] = [
@@ -33,16 +38,18 @@ export function tuneOptions(
   cases: BenchCase[] = CORPUS,
   grid: CompressOptions[] = DEFAULT_GRID,
   survivalWeight = 0.7,
+  rankBy: RankBy = "weighted",
 ): TuneResult {
   const w = Math.min(1, Math.max(0, survivalWeight));
-  let best: TuneResult | null = null;
+  let best: (TuneResult & { key: number }) | null = null;
   for (const options of grid) {
     const r = runFidelity(cases, options);
-    const score = r.inlineSurvival * w + r.avgRatio * (1 - w);
-    if (!best || score > best.score) {
-      best = { options, score, survival: r.inlineSurvival, ratio: r.avgRatio };
-    }
+    const cng = compressionCng(r.inlineSurvival, r.avgRatio);
+    // CNG ranking: prefer least quality lost per token saved, tiebreak by savings.
+    const key = rankBy === "cng" ? cng + r.avgRatio * 1e-6 : r.inlineSurvival * w + r.avgRatio * (1 - w);
+    if (!best || key > best.key) best = { options, score: key, survival: r.inlineSurvival, ratio: r.avgRatio, cng, key };
   }
-  // grid is non-empty, so best is set; fall back defensively.
-  return best ?? { options: {}, score: 0, survival: 0, ratio: 0 };
+  if (!best) return { options: {}, score: 0, survival: 0, ratio: 0, cng: 0 };
+  const { key: _key, ...result } = best;
+  return result;
 }

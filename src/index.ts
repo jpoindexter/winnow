@@ -33,9 +33,12 @@ export type { TokenScorer, PruneOptions, PruneResult } from "./prune.js";
 export { makeCounter, heuristicCount, countTokens } from "./tokens.js";
 export type { Encoder } from "./tokens.js";
 
+// Cost-Normalized Gain (quality per token)
+export { costNormalizedGain, compressionCng } from "./cng.js";
+
 // Adaptive, bench-driven option tuning
 export { tuneOptions, DEFAULT_GRID } from "./adapt.js";
-export type { TuneResult } from "./adapt.js";
+export type { TuneResult, RankBy } from "./adapt.js";
 
 // Reversible store
 export { retrieve, stashOriginal, contentId, resolveStoreDir } from "./store.js";

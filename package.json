@@ -1,6 +1,6 @@
 {
   "name": "winnow",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Local-first context compression for AI agents — keep the signal, winnow the chaff. Reversible, content-aware, zero runtime deps.",
   "type": "module",
   "license": "MIT",

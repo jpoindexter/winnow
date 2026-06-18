@@ -2,6 +2,13 @@
 
 All notable changes to winnow are documented here. Versions follow [semver](https://semver.org).
 
+## 0.6.0 — Cost-Normalized Gain (CNG)
+
+- **CNG metric** (costNormalizedGain / compressionCng) from S2L (arXiv:2606.16769): quality
+  kept per unit of relative token-cost change. tuneOptions gains a rankBy:"cng" mode
+  (prefer least quality lost per token saved, tiebreak savings); the fidelity bench reports
+  CNG. Lossless compression scores 0 (no loss); lossy elision goes negative.
+
 ## 0.5.0 — columnar TOON (dictionary / constant-column)
 
 - **TOON columnar mode (TOONC)** — `encodeColumnar`/`decodeColumnar`, opt-in via

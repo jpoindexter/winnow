@@ -1,5 +1,6 @@
 import { compressText } from "../router.js";
 import { estTokens, type CompressOptions } from "../types.js";
+import { compressionCng } from "../cng.js";
 import { CORPUS, type BenchCase, type Position } from "./corpus.js";
 
 // Fidelity bench — measured, not claimed. For each case: compress, record the token
@@ -23,6 +24,8 @@ export interface FidelityReport {
   inlineSurvival: number;
   /** Inline survival split by needle position. */
   byPosition: Partial<Record<Position, number>>;
+  /** Cost-Normalized Gain vs uncompressed: quality kept per token saved (0 = lossless). */
+  cng: number;
 }
 
 function mean(xs: number[]): number {
@@ -44,12 +47,9 @@ export function runFidelity(cases: BenchCase[] = CORPUS, opts: CompressOptions =
     const inPos = results.filter((r) => r.where === pos);
     byPosition[pos] = mean(inPos.map((r) => (r.inlineSurvived ? 1 : 0)));
   }
-  return {
-    cases: results,
-    avgRatio: mean(results.map((r) => r.ratio)),
-    inlineSurvival: mean(results.map((r) => (r.inlineSurvived ? 1 : 0))),
-    byPosition,
-  };
+  const avgRatio = mean(results.map((r) => r.ratio));
+  const inlineSurvival = mean(results.map((r) => (r.inlineSurvived ? 1 : 0)));
+  return { cases: results, avgRatio, inlineSurvival, byPosition, cng: compressionCng(inlineSurvival, avgRatio) };
 }
 
 /** One-line-per-case table + summary. Pure. */
@@ -63,7 +63,7 @@ export function formatFidelity(r: FidelityReport): string {
     `winnow fidelity — ${r.cases.length} cases`,
     ...rows,
     "",
-    `avg savings: ${pct(r.avgRatio)}   inline needle survival: ${pct(r.inlineSurvival)}`,
+    `avg savings: ${pct(r.avgRatio)}   inline needle survival: ${pct(r.inlineSurvival)}   CNG: ${r.cng.toFixed(3)}`,
     `by position: ${byPos}`,
     `recoverable fidelity: 100% (every elided original is retrievable from the store)`,
   ].join("\n");
