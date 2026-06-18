@@ -38,7 +38,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "bench": "tsx src/bench/cli.ts",
-    "prepublishOnly": "npm run build"
+    "prepare": "npm run build"
   },
   "engines": {
     "node": ">=18"
