@@ -10,7 +10,7 @@ import { stats } from "../index.js";
 // Newline-delimited JSON-RPC 2.0 over stdin/stdout. Local-first: no network, no egress.
 
 const PROTOCOL_VERSION = "2024-11-05";
-const SERVER = { name: "winnow", version: "0.1.0" };
+const SERVER = { name: "winnow", version: "0.2.0" };
 
 const TOOLS = [
   {

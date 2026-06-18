@@ -1,5 +1,10 @@
 # winnow
 
+[![ci](https://github.com/jpoindexter/winnow/actions/workflows/ci.yml/badge.svg)](https://github.com/jpoindexter/winnow/actions/workflows/ci.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+![node](https://img.shields.io/badge/node-%E2%89%A518-brightgreen)
+![runtime deps](https://img.shields.io/badge/runtime%20deps-0-brightgreen)
+
 **Local-first context compression for AI agents.** Keep the signal, winnow the chaff.
 
 Agents burn tokens on fat tool outputs — JSON dumps, logs, file reads, RAG chunks, conversation history. `winnow` compresses that text *before* it reaches the model, cutting tokens by **40–95%** while keeping what matters. It's content-aware, **reversible** (originals are recoverable on demand), and the core has **zero runtime dependencies**. Everything runs on your machine — no proxy, no API key, no egress.
