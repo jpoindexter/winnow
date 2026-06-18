@@ -33,6 +33,9 @@ export interface CompressOptions {
   tailItems?: number;
   /** Truncate string values longer than this. Default 200. */
   maxStringLength?: number;
+  /** Object-arrays: transcode to a lossless TOON table (keep every row) instead of
+   * eliding the middle. Default false (the crusher's elision stays the default). */
+  tabular?: boolean;
 }
 
 export const DEFAULTS: Required<CompressOptions> = {
@@ -40,4 +43,5 @@ export const DEFAULTS: Required<CompressOptions> = {
   headItems: 3,
   tailItems: 1,
   maxStringLength: 200,
+  tabular: false,
 };

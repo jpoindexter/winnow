@@ -2,6 +2,7 @@ import type { CompressOptions, CompressResult, ContentType } from "./types.js";
 import { DEFAULTS, estTokens } from "./types.js";
 import { crushJson } from "./json-crush.js";
 import { squashLogs } from "./log-squash.js";
+import { toonCompress } from "./toon.js";
 
 // Content router — detect what a block of text is, route it to the right compressor,
 // and only keep the result if it actually shrank. Pure: no I/O, no stashing (the
@@ -46,7 +47,14 @@ export function binaryStub(text: string): string {
 /** Apply the compressor for a given content type. Pure. */
 function applyCompressor(text: string, type: ContentType, opts: Required<CompressOptions>): string {
   if (type === "binary") return binaryStub(text);
-  if (type === "json") return crushJson(text, opts);
+  if (type === "json") {
+    // Opt-in: lossless TOON table (keeps every row) before falling back to elision.
+    if (opts.tabular) {
+      const table = toonCompress(text);
+      if (table) return table;
+    }
+    return crushJson(text, opts);
+  }
   // logs AND text both benefit from blank-line/duplicate collapse (transcripts,
   // verbose build output). squashLogs is a no-op when there's nothing to collapse.
   return squashLogs(text);

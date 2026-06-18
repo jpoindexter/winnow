@@ -14,6 +14,17 @@ export { crushJson } from "./json-crush.js";
 export { squashLogs } from "./log-squash.js";
 export { compressCode, isCodeContent } from "./code.js";
 
+// Lossless tabular transcoding (TOON)
+export { encodeTable, decodeTable, toonCompress, isObjectArray } from "./toon.js";
+
+// Cross-context dedup
+export { dedupeBlocks, rehydrateBlocks, dedupeMessages } from "./dedup.js";
+export type { DedupResult } from "./dedup.js";
+
+// Conversation-history compaction
+export { compactHistory } from "./history.js";
+export type { Msg, CompactOptions } from "./history.js";
+
 // Reversible store
 export { retrieve, stashOriginal, contentId, resolveStoreDir } from "./store.js";
 
