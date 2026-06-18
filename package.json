@@ -1,0 +1,55 @@
+{
+  "name": "winnow",
+  "version": "0.1.0",
+  "description": "Local-first context compression for AI agents — keep the signal, winnow the chaff. Reversible, content-aware, zero runtime deps.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Jason Poindexter",
+  "keywords": [
+    "llm",
+    "agents",
+    "context",
+    "compression",
+    "tokens",
+    "mcp",
+    "cost",
+    "kv-cache"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp/server.d.ts",
+      "import": "./dist/mcp/server.js"
+    }
+  },
+  "bin": {
+    "winnow": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "bench": "tsx src/bench/cli.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "optionalDependencies": {
+    "typescript": ">=5"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsx": "^4",
+    "typescript": "^5",
+    "vitest": "^2"
+  }
+}
