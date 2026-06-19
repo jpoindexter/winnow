@@ -52,6 +52,52 @@ import { compressMessages } from "winnow";
 const slim = await compressMessages(messages); // compresses each message's content
 ```
 
+## Exactly what it does
+
+No hand-waving — here is the literal transformation each compressor applies, on real input, with real savings. (Token counts use the default `length/4` heuristic; inject a real tokenizer for exact figures.)
+
+**JSON — keep the edges, elide the middle (recoverable).** A 200-object dump:
+
+```text
+BEFORE  [ {"id":0,"name":"item-0","active":true,"score":0}, {"id":1,…}, … ×200 ]
+AFTER   head (3) + tail (1) objects kept verbatim; the middle becomes an `__elided__` marker
+4252 → 112 tokens   (97% saved)
+```
+
+The model sees the schema and a sample; `compress()` stashes the full array so `retrieve(id)` returns it intact. An agent reading 200 rows needs the shape and an example — and asks for row 137 when it actually needs it.
+
+**Logs — collapse repeats to a count.** 40 identical lines:
+
+```text
+BEFORE  2026-06-19T21:04:11Z INFO  cache hit for key=session:abc123 (ttl 300s)
+        …the same line ×40
+AFTER   2026-06-19T21:04:11Z INFO  cache hit for key=session:abc123 (ttl 300s) (×40)
+710 → 19 tokens   (97% saved)
+```
+
+"It happened 40 times" is the signal; 40 byte-identical copies are the chaff.
+
+**Repeated blocks — reference, don't repeat (reversible).** A boilerplate paragraph repeated down a page (`¶` = blank line):
+
+```text
+BEFORE  # Report ¶ <cookie notice> ¶ Section 1 ¶ <cookie notice> ¶ Section 2 ¶ <cookie notice>
+AFTER   # Report ¶ <cookie notice> ¶ Section 1 ¶ ⟦↺#0⟧ ¶ Section 2 ¶ ⟦↺#0⟧
+115 → 51 tokens   (56% saved)
+```
+
+The first occurrence stays inline; later identical blocks become `⟦↺#k⟧` pointing at it, and `rehydrateBlocks` restores the exact original. Repeated nav/footer/disclaimer blocks are the biggest single waste in scraped web and RAG content.
+
+**On real agent tool output.** `compressText` detects the type and routes; `dedupeBlocks` mops up the repeated blocks the router leaves inline. Measured on representative results:
+
+| tool output | tokens | saved |
+|---|---|---|
+| web page (repeated cookie + footer) | 260 | **47%** |
+| 8 search results (shared sponsored block) | 344 | **58%** |
+| 6 repeated stack traces | 195 | **79%** |
+| plain prose, no repetition | 16 | **0% — returned untouched** |
+
+Savings are content-dependent, and that's the honest point: repetition-heavy output (most web / log / RAG content) compresses hard; genuinely unique prose doesn't, and winnow hands it back unchanged rather than mangling it. Everything elided is recoverable — **lossy inline, lossless on demand.**
+
 ## Benchmark — measured, not claimed
 
 `winnow bench` runs a fidelity harness: for each case it records token savings and checks whether the "needle" (the fact a model would need) **survives compression inline**. Anything elided is still recoverable from the store, so *recoverable* fidelity is 100% by construction — this measures the harder number, what survives **without** a retrieval round-trip.
