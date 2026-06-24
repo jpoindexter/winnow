@@ -40,7 +40,8 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "bench": "tsx src/bench/cli.ts"
+    "bench": "tsx src/bench/cli.ts",
+    "prepare": "exit 0"
   },
   "engines": {
     "node": ">=18"
