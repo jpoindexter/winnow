@@ -23,8 +23,16 @@ Compression that silently drops the wrong line is worse than no compression. `wi
 
 ## Install
 
+Install from GitHub (not on the npm registry — the `winnow` name there is an unrelated package):
+
 ```bash
-npm install winnow
+npm install github:jpoindexter/winnow
+```
+
+Pin to a commit for reproducible builds:
+
+```bash
+npm install "github:jpoindexter/winnow#<commit-sha>"
 ```
 
 Node ≥ 18, ESM. Core has no runtime deps. Code (AST) compression uses an optional `typescript` peer.
@@ -156,6 +164,8 @@ cacheHolds(lastKey, aligned); // did the cached prefix survive this turn?
 ```
 
 ## CLI
+
+The `winnow` command is on your PATH after a global install (`npm install -g github:jpoindexter/winnow`); otherwise run it from a local install with `npx winnow …`.
 
 ```bash
 winnow bench                 # fidelity benchmark (savings + needle survival)
