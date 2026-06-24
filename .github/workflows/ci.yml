@@ -22,4 +22,7 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      # dist/ is committed so the package installs from GitHub with no toolchain.
+      # Fail if a source change wasn't rebuilt — keeps the shipped dist/ in sync with src/.
+      - run: git diff --exit-code -- dist || (echo "::error::dist/ is out of sync with src/ — run 'npm run build' and commit dist/" && exit 1)
       - run: node dist/cli.js bench

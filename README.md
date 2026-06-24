@@ -111,20 +111,21 @@ Savings are content-dependent, and that's the honest point: repetition-heavy out
 `winnow bench` runs a fidelity harness: for each case it records token savings and checks whether the "needle" (the fact a model would need) **survives compression inline**. Anything elided is still recoverable from the store, so *recoverable* fidelity is 100% by construction — this measures the harder number, what survives **without** a retrieval round-trip.
 
 ```
-winnow fidelity — 6 cases
+winnow fidelity — 7 cases
   json-head    json  save  86%  inline ✓
   json-tail    json  save  86%  inline ✓
   json-middle  json  save  86%  inline · (recoverable)
+  wide-table   json  save  97%  inline · (recoverable)
   log-error    logs  save  99%  inline ✓
   log-dupes    logs  save  99%  inline ✓
   text-prose   text  save   0%  inline ✓
 
-avg savings: 76%   inline needle survival: 83%
+avg savings: 79%   inline needle survival: 71%   CNG: -0.362
 by position: head 100% · tail 100% · middle 0% · anywhere 100%
 recoverable fidelity: 100% (every elided original is retrievable from the store)
 ```
 
-The honest tradeoff is visible: a needle buried deep in the middle of a 200-row array is elided inline — and recoverable in one `retrieve` call. Logs and head/tail JSON keep their signal at a fraction of the tokens.
+The honest tradeoff is visible: a needle buried deep in the middle of a 200-row array is elided inline — and recoverable in one `retrieve` call. Logs and head/tail JSON keep their signal at a fraction of the tokens. (`CNG`, cost-normalized gain, is negative on the default run because it scores *inline* fidelity only and the default mode is lossy-but-recoverable — it's the conservative number, not a quality loss, since every elided original is retrievable.)
 
 ## API
 
