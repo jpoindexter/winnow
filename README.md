@@ -165,7 +165,19 @@ cacheHolds(lastKey, aligned); // did the cached prefix survive this turn?
 
 ## CLI
 
-The `winnow` command is on your PATH after a global install (`npm install -g github:jpoindexter/winnow`); otherwise run it from a local install with `npx winnow …`.
+Run the CLI straight from GitHub, no install:
+
+```bash
+npx github:jpoindexter/winnow bench
+```
+
+For a persistent `winnow` command, clone the repo and link it:
+
+```bash
+git clone https://github.com/jpoindexter/winnow && cd winnow && npm install && npm link
+```
+
+(`npm install -g` from a git URL is unreliable on some npm versions — use `npx` or `npm link`.)
 
 ```bash
 winnow bench                 # fidelity benchmark (savings + needle survival)
