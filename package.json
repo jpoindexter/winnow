@@ -4,7 +4,10 @@
   "description": "Local-first context compression for AI agents — keep the signal, winnow the chaff. Reversible, content-aware, zero runtime deps.",
   "type": "module",
   "license": "MIT",
-  "author": "Jason Poindexter",
+  "author": "Jason Poindexter <jason@theft.studio>",
+  "repository": { "type": "git", "url": "git+https://github.com/jpoindexter/winnow.git" },
+  "bugs": { "url": "https://github.com/jpoindexter/winnow/issues" },
+  "homepage": "https://github.com/jpoindexter/winnow#readme",
   "keywords": [
     "llm",
     "agents",
@@ -37,8 +40,7 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "bench": "tsx src/bench/cli.ts",
-    "prepare": "npm run build"
+    "bench": "tsx src/bench/cli.ts"
   },
   "engines": {
     "node": ">=18"
